@@ -34,9 +34,9 @@ const petSchema = new mongoose.Schema({
 const Pet = mongoose.model("Pet", petSchema);
 
 const adoptionRequestSchema = new mongoose.Schema({
-  petId: mongoose.Schema.Types.ObjectId,
-  userId: mongoose.Schema.Types.ObjectId,
-  message: String,
+  name: { type: String, required: true },
+  email: { type: String, required: true },
+  message: { type: String, required: true },
   status: { type: String, default: "Pending" },
 });
 const AdoptionRequest = mongoose.model("AdoptionRequest", adoptionRequestSchema);
@@ -98,11 +98,11 @@ app.get("/api/pets", async (req, res) => {
 
 app.post("/api/adopt", async (req, res) => {
   try {
-    const { userId, petId, message } = req.body;
-    if (!userId || !petId || !message) return res.status(400).json({ message: "All fields are required" });
-    const existingRequest = await AdoptionRequest.findOne({ userId, petId });
+    const {name, email, message } = req.body;
+    if ( !name || !email || !message) return res.status(400).json({ message: "All fields are required" });
+    const existingRequest = await AdoptionRequest.findOne({name,email});
     if (existingRequest) return res.status(400).json({ message: "You have already requested adoption for this pet" });
-    const newRequest = new AdoptionRequest({ userId, petId, message });
+    const newRequest = new AdoptionRequest({name, email, message });
     await newRequest.save();
     res.status(201).json({ message: "Adoption request submitted!", request: newRequest });
   } catch (error) {
@@ -122,5 +122,5 @@ app.post("/api/contact", async (req, res) => {
   }
 });
 
-const PORT = 4005;
+const PORT = 3000;
 app.listen(PORT, () => console.log("Server running..."));
